@@ -18,16 +18,21 @@ public class FirstTest extends Assert {
     private static WebDriver webDriver;
     private static String email;
     private static String password;
+    private By mailLocator = By.cssSelector("div.b-datalist_search > div.b-datalist__body > div.b-datalist__item");
 
     @Before
     public void setup() {
         System.setProperty("webdriver.chrome.driver","C:\\Users\\Gleb Durygin\\Documents\\IdeaProjects\\chromedriver.exe");
+        System.setProperty("webdriver.gecko.driver","C:\\Users\\Gleb Durygin\\Documents\\IdeaProjects\\geckodriver.exe");
+        ///ChromeOptions chromeOptions = new ChromeOptions();
+        //chromeOptions.setPageLoadStrategy(PageLoadStrategy.NORMAL);
+
         webDriver = new ChromeDriver();
+        //webDriver = new FirefoxDriver();
         webDriver.manage().window().maximize();
-        webDriver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
         webDriver.get("https://mail.ru/");
-        email = "mail@mail.ru";
-        password = "12345678i";
+        email = "red90label@mail.ru";
+        password = "h7k8jbnm";
     }
 
     @Test
@@ -38,11 +43,10 @@ public class FirstTest extends Assert {
         passwordField.sendKeys(password);
         WebElement loginButton = new WebDriverWait(webDriver, 4).until(ExpectedConditions.presenceOfElementLocated(By.id("mailbox:submit")));
         loginButton.click();
-        WebElement checkEmail = webDriver.findElement(By.id("PH_user-email"));
-        //WebElement checkEmail = webDriver.findElement(By.cssSelector(".PH_user-email"));
-        //WebElement checkMail= new WebDriverWait(webDriver, 4).until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(".b-datalists")));
+        webDriver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+        WebElement checkEmail = new WebDriverWait(webDriver, 4).until(ExpectedConditions.presenceOfElementLocated(By.id("PH_user-email")));
+
         String mailUser = checkEmail.getTagName();
-        System.out.println(webDriver.getCurrentUrl());
         assertEquals(mailUser,"i");
     }
 
