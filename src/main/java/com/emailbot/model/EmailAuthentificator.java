@@ -1,11 +1,18 @@
 package com.emailbot.model;
 
+import java.net.PasswordAuthentication;
+
 public class EmailAuthentificator extends javax.mail.Authenticator
 {
     public EmailAuthentificator(String login,String password)
     {
         this.login = login;
-        this.password = password;
+        this.password = password.toCharArray();
+    }
+
+    public PasswordAuthentication getPasswordAuthentification()
+    {
+        return new PasswordAuthentication(login,password);
     }
 
     public String getLogin() {
@@ -16,15 +23,8 @@ public class EmailAuthentificator extends javax.mail.Authenticator
         this.login = login;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 
     private String login;
-    private String password;
+    private char[] password;
 
 }
