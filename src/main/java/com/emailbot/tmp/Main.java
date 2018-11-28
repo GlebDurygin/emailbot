@@ -53,9 +53,11 @@ public class Main {
                 System.out.println("From : " + messages[i].getFrom()[0]);
                 System.out.println("Subject : " + messages[i].getSubject());
                 System.out.println("Sent Date : " + messages[i].getSentDate());
-                System.out.println(getTextFromMessage(messages[i]));
-
-
+                String stringMessage = getTextFromMessage(messages[i]);
+                stringMessage = stringMessage.substring(stringMessage.indexOf("<http://")+1);
+                String link = stringMessage.substring(0,stringMessage.indexOf(">"));
+                String email = stringAddress.substring(stringAddress.indexOf("<")+1,stringAddress.indexOf(">"));
+                System.out.println(link);
             }
         } catch (NoSuchProviderException e) {
             System.err.println(e.getMessage());
