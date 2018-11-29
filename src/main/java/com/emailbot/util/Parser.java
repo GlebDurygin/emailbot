@@ -7,10 +7,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
-import javax.mail.Address;
-import javax.mail.BodyPart;
-import javax.mail.Message;
-import javax.mail.MessagingException;
+import javax.mail.*;
 import javax.mail.internet.MimeMultipart;
 import java.io.IOException;
 import java.util.Random;
@@ -37,7 +34,7 @@ public class Parser {
                 if (stringAddress.indexOf("<") != -1) {
                     String email = stringAddress.substring(stringAddress.indexOf("<") + 1, stringAddress.indexOf(">"));
                     if (email.equalsIgnoreCase(Constants.CHECK_EMAIL)) {
-                        //messages[i].setFlag(Flags.Flag.SEEN,true);
+                        messages[i].setFlag(Flags.Flag.SEEN,true);
                         String stringMessage = getTextFromMessage(messages[i]);
                         if (stringMessage.indexOf("<http://") != -1) {
                             stringMessage = stringMessage.substring(stringMessage.indexOf("<http://") + 1);
@@ -75,7 +72,7 @@ public class Parser {
             BodyPart bodyPart = mimeMultipart.getBodyPart(i);
             if (bodyPart.isMimeType("text/plain")) {
                 result = result + "\n" + bodyPart.getContent();
-                break; // without break same text appears twice in my tests
+                break;
             } else if (bodyPart.isMimeType("text/html")) {
                 String html = (String) bodyPart.getContent();
                 result = result + "\n" + org.jsoup.Jsoup.parse(html).text();
@@ -87,13 +84,12 @@ public class Parser {
     }
 
     public String transitionToMail(String link) throws IOException {
-        String result = "";
         Connection connection = Jsoup.connect(link);
         Document document = connection.get();
         Element element = document.select("h2.lbc-ttl-h2").first();
         Elements elements = document.select(".detail-booking__item");
         if (elements == null || element == null) return Constants.EXCEPTION_TEXT;
-        result = "Random number: (#" + random.nextInt() + ") ";
+        String result = "Random number: (#" + random.nextInt() + ") ";
         result += element.text() + " : ";
         for (int i = 0; i < 4 && i < elements.size(); i++) {
             result += elements.get(i).text() + " ";
