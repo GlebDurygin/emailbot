@@ -1,30 +1,22 @@
 package com.emailbot.model;
 
-import java.net.PasswordAuthentication;
+import javax.mail.Authenticator;
+import javax.mail.PasswordAuthentication;
 
-public class EmailAuthentificator extends javax.mail.Authenticator
+public class EmailAuthentificator extends Authenticator
 {
     public EmailAuthentificator(String login,String password)
     {
         this.login = login;
-        this.password = password.toCharArray();
+        this.password = password;
     }
 
-    public PasswordAuthentication getPasswordAuthentification()
+    public PasswordAuthentication getPasswordAuthentication()
     {
         return new PasswordAuthentication(login,password);
     }
 
-    public String getLogin() {
-        return login;
-    }
-
-    public void setLogin(String login) {
-        this.login = login;
-    }
-
-
     private String login;
-    private char[] password;
+    private String password;
 
 }

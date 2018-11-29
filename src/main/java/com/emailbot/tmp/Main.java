@@ -1,23 +1,19 @@
 package com.emailbot.tmp;
 
+import com.emailbot.model.EmailAuthentificator;
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
 import javax.mail.*;
-import javax.mail.internet.MimeMultipart;
+import javax.mail.internet.*;
 import javax.mail.search.FlagTerm;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 
 public class Main {
-    public static void ReadMail() {
+    public static String ReadMail() {
         Properties properties = new Properties();
         properties.put("mail.debug", "false");
         properties.put("mail.store.protocol", "imaps");
@@ -25,9 +21,9 @@ public class Main {
         properties.put("mail.imaps.host", Constants.IMAP_SERVER_MAIL_RU);
         properties.put("mail.imap.port", Constants.IMAP_PORT);
 
-        //Authenticator authenticator = new EmailAuthentificator(Constants.AUTH_EMAIL, Constants.AUTH_PASSWORD);
+        Authenticator authenticator = new EmailAuthentificator(Constants.AUTH_EMAIL, Constants.AUTH_PASSWORD);
 
-        Session session = Session.getDefaultInstance(properties, null);
+        Session session = Session.getInstance(properties, authenticator);
         session.setDebug(false);
         try {
             Store store = session.getStore("imaps");
@@ -39,34 +35,28 @@ public class Main {
             Folder inbox = store.getFolder("INBOX");
 
             // Открываем папку в режиме только для чтения
-            inbox.open(Folder.READ_ONLY);
+            inbox.open(Folder.READ_WRITE);
 
-            System.out.println("Количество сообщений : " +
-                    String.valueOf(inbox.getMessageCount()));
             if (inbox.getMessageCount() == 0)
-                return;
+                return "";
 
             // unseen messages
             Flags seen = new Flags(Flags.Flag.SEEN);
-            FlagTerm unseenFlagTerm = new FlagTerm(seen,false);
+            FlagTerm unseenFlagTerm = new FlagTerm(seen, false);
             Message messages[] = inbox.search(unseenFlagTerm);
 
-            System.out.println("Unseen Messages Count = "+messages.length);
             for (int i = 0; i < messages.length; i++) {
-                System.out.println("Message " + (i + 1));
                 Address address = messages[i].getFrom()[0];
                 String stringAddress = address.toString();
-
-                System.out.println("From address : " + stringAddress.substring(stringAddress.indexOf("<")+1,stringAddress.indexOf(">")));
-                System.out.println("From : " + messages[i].getFrom()[0]);
-                System.out.println("Subject : " + messages[i].getSubject());
-                System.out.println("Sent Date : " + messages[i].getSentDate());
-                String stringMessage = getTextFromMessage(messages[i]);
-                stringMessage = stringMessage.substring(stringMessage.indexOf("<http://")+1);
-                String link = stringMessage.substring(0,stringMessage.indexOf(">"));
-                String email = stringAddress.substring(stringAddress.indexOf("<")+1,stringAddress.indexOf(">"));
-                System.out.println(link);
-                transitionToMail(link);
+                String email = stringAddress.substring(stringAddress.indexOf("<") + 1, stringAddress.indexOf(">"));
+                if (email.equalsIgnoreCase(Constants.CHECK_EMAIL))
+                {
+                    messages[i].setFlag(Flags.Flag.SEEN,true);
+                    String stringMessage = getTextFromMessage(messages[i]);
+                    stringMessage = stringMessage.substring(stringMessage.indexOf("<http://") + 1);
+                    String link = stringMessage.substring(0, stringMessage.indexOf(">"));
+                    return transitionToMail(link);
+                }
             }
         } catch (NoSuchProviderException e) {
             System.err.println(e.getMessage());
@@ -75,6 +65,7 @@ public class Main {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return "";
     }
 
     public static String transitionToMail(String link) throws IOException {
@@ -89,6 +80,36 @@ public class Main {
         return result;
     }
 
+    public static void sendMail(String text)
+    {
+        Properties properties = new Properties();
+        properties.put("mail.smtp.host"               , Constants.STMP_SERVER_MAIL_RU   );
+        properties.put("mail.smtp.port"               , Constants.STMP_PORT             );
+        properties.put("mail.smtp.auth"               , "true"                          );
+        properties.put("mail.smtp.ssl.enable"         , "true"                          );
+        properties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+        Authenticator authenticator = new EmailAuthentificator(Constants.AUTH_EMAIL, Constants.AUTH_PASSWORD);
+
+        try {
+            Session session = Session.getInstance(properties, authenticator);
+            session.setDebug(false);
+            Message message = new MimeMessage(session);
+
+            Multipart multipart = new MimeMultipart();
+            MimeBodyPart bodyPart = new MimeBodyPart();
+            bodyPart.setContent(text,"text/plain; charset=utf-8");
+            multipart.addBodyPart(bodyPart);
+            message.setFrom(new InternetAddress(Constants.AUTH_EMAIL));
+            message.setRecipient(Message.RecipientType.TO,new InternetAddress(Constants.SEND_EMAIL));
+            message.setSubject(Constants.MAIL_THEME);
+            message.setContent(multipart);
+            Transport.send(message);
+        } catch (AddressException e) {
+            e.printStackTrace();
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
 
     private static String getTextFromMessage(Message message) throws MessagingException, IOException {
         String result = "";
@@ -122,6 +143,8 @@ public class Main {
     }
 
     public static void main(String[] args){
-        ReadMail();
+        String result = ReadMail();
+        if (result != "")
+            sendMail(result);
     }
 }
