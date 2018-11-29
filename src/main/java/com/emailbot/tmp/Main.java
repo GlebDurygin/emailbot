@@ -1,11 +1,19 @@
 package com.emailbot.tmp;
 
-import com.emailbot.model.EmailAuthentificator;
+import org.jsoup.Connection;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
+import org.jsoup.select.Elements;
 
 import javax.mail.*;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.search.FlagTerm;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 
 public class Main {
@@ -58,6 +66,7 @@ public class Main {
                 String link = stringMessage.substring(0,stringMessage.indexOf(">"));
                 String email = stringAddress.substring(stringAddress.indexOf("<")+1,stringAddress.indexOf(">"));
                 System.out.println(link);
+                transitionToMail(link);
             }
         } catch (NoSuchProviderException e) {
             System.err.println(e.getMessage());
@@ -67,6 +76,19 @@ public class Main {
             e.printStackTrace();
         }
     }
+
+    public static String transitionToMail(String link) throws IOException {
+        String result ="";
+        Connection connection = Jsoup.connect(link);
+        Document document = connection.get();
+        Elements elements = document.select(".detail-booking__item");
+        for(int i =0; i<4 && i<elements.size(); i++)
+        {
+            result += elements.get(i).text() + " ";
+        }
+        return result;
+    }
+
 
     private static String getTextFromMessage(Message message) throws MessagingException, IOException {
         String result = "";
