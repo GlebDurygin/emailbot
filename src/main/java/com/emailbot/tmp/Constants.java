@@ -7,9 +7,10 @@ public class Constants {
         AUTH_PASSWORD = "123456789i",
         IMAP_SERVER_MAIL_RU = "imap.mail.ru",
         IMAP_PORT = "993",
-        MAIL_THEME = "Mail",
+        MAIL_THEME = "theme",
         STMP_SERVER_MAIL_RU = "smtp.mail.ru",
         STMP_PORT = "465",
-        SEND_EMAIL = "mail@mail.ru",
-        CHECK_EMAIL = "mail@gmail.com";
+        SEND_EMAIL = "sendmail@mail.ru",
+        CHECK_EMAIL = "checkmail@gmail.com",
+        EXCEPTION_TEXT = "Not Value";
 }
