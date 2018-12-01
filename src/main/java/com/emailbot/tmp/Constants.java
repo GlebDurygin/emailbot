@@ -5,6 +5,8 @@ public class Constants {
     public static final String
             AUTH_EMAIL = "mail@mail.ru",
             AUTH_PASSWORD = "123456789i",
+            BOT_EMAIL = "botmail@mail.ru",
+            BOT_PASSWORD = "botpass",
             IMAP_SERVER_MAIL_RU = "imap.mail.ru",
             IMAP_PORT = "993",
             MAIL_THEME = "theme",
@@ -13,5 +15,5 @@ public class Constants {
             SEND_EMAIL = "sendmail@mail.ru",
             CHECK_EMAIL = "checkmail@gmail.com",
             EXCEPTION_TEXT = "Not Value";
-    public static final int sleepInterval = 1000;
+    public static final int sleepInterval = 200;
 }
