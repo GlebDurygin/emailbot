@@ -20,6 +20,12 @@ public class SendMailController {
 
     private String textMail;
 
+    public void setThemeMail(String themeMail) {
+        this.themeMail = themeMail;
+    }
+
+    private String themeMail;
+
     public SendMailController() {
         sendMail = new SendMail();
         random = new Random();
@@ -33,9 +39,9 @@ public class SendMailController {
             MimeBodyPart bodyPart = new MimeBodyPart();
             bodyPart.setContent(textMail, "text/plain; charset=utf-8");
             multipart.addBodyPart(bodyPart);
-            message.setFrom(new InternetAddress(Constants.AUTH_EMAIL));
+            message.setFrom(new InternetAddress(Constants.BOT_EMAIL));
             message.setRecipient(Message.RecipientType.TO, new InternetAddress(Constants.SEND_EMAIL));
-            message.setSubject(Constants.MAIL_THEME+" (#"+random.nextInt()+")");
+            message.setSubject(Constants.MAIL_THEME+ " " + themeMail + " (#"+random.nextInt()+")");
             message.setContent(multipart);
             Transport.send(message);
         } catch (AddressException e) {

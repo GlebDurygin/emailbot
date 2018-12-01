@@ -23,7 +23,7 @@ public class SendMail {
         properties.put("mail.smtp.auth", "true");
         properties.put("mail.smtp.ssl.enable", "true");
         properties.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
-        Authenticator authenticator = new EmailAuthentificator(Constants.AUTH_EMAIL, Constants.AUTH_PASSWORD);
+        Authenticator authenticator = new EmailAuthentificator(Constants.BOT_EMAIL, Constants.BOT_PASSWORD);
         session = Session.getInstance(properties, authenticator);
         session.setDebug(false);
     }

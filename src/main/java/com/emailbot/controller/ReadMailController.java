@@ -5,6 +5,9 @@ import com.emailbot.tmp.Constants;
 
 import javax.mail.*;
 import javax.mail.search.FlagTerm;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class ReadMailController {
     private ReadMail readMail;
@@ -27,7 +30,10 @@ public class ReadMailController {
             Flags seen = new Flags(Flags.Flag.SEEN);
             FlagTerm unseenFlagTerm = new FlagTerm(seen, false);
             Message messages[] = inbox.search(unseenFlagTerm);
-            System.out.println("Непрочитанные = "+ messages.length);
+            System.out.println("UnseenMessges= " + messages.length);
+            DateFormat dateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+            Date date = new Date();
+            System.out.println(dateFormat.format(date));
             return messages;
         } catch (NoSuchProviderException e) {
             e.printStackTrace();

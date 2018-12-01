@@ -28,21 +28,26 @@ public class Parser {
 
     public String getLinkFromMessages(Message[] messages) {
         try {
-            for (int i = 0; i < messages.length; i++) {
-                Address address = messages[i].getFrom()[0];
-                String stringAddress = address.toString();
-                if (stringAddress.indexOf("<") != -1) {
-                    String email = stringAddress.substring(stringAddress.indexOf("<") + 1, stringAddress.indexOf(">"));
-                    if (email.equalsIgnoreCase(Constants.CHECK_EMAIL)) {
-                        messages[i].setFlag(Flags.Flag.SEEN,true);
-                        String stringMessage = getTextFromMessage(messages[i]);
-                        if (stringMessage.indexOf("<http://") != -1) {
-                            stringMessage = stringMessage.substring(stringMessage.indexOf("<http://") + 1);
-                            String link = stringMessage.substring(0, stringMessage.indexOf(">"));
-                            return link;
-                        } else return Constants.EXCEPTION_TEXT;
+            if (messages != null && messages.length != 0) {
+                for (int i = 0; i < messages.length; i++) {
+                    Address[] addresses = messages[i].getFrom();
+                    if (addresses != null && addresses.length != 0) {
+                        Address address = messages[i].getFrom()[0];
+                        String stringAddress = address.toString();
+                        if (stringAddress.indexOf("<") != -1) {
+                            String email = stringAddress.substring(stringAddress.indexOf("<") + 1, stringAddress.indexOf(">"));
+                            if (email.equals(Constants.CHECK_EMAIL) || email.equalsIgnoreCase(Constants.CHECK_EMAIL)) {
+                                messages[i].setFlag(Flags.Flag.SEEN, true);
+                                String stringMessage = getTextFromMessage(messages[i]);
+                                if (stringMessage.indexOf("http://demo.booking.agentpassport.ru") != -1) {
+                                    stringMessage = stringMessage.substring(stringMessage.indexOf("http://demo.booking.agentpassport.ru"));
+                                    String link = stringMessage.substring(0, stringMessage.indexOf(" ")-1);
+                                    return link;
+                                }
+                            }
+                        }
                     }
-                } else return Constants.EXCEPTION_TEXT;
+                }
             }
         } catch (MessagingException e) {
             e.printStackTrace();
@@ -54,7 +59,6 @@ public class Parser {
 
     private String getTextFromMessage(Message message) throws MessagingException, IOException {
         String result = "";
-        message.isExpunged();
         if (message.isMimeType("text/plain")) {
             result = message.getContent().toString();
         } else if (message.isMimeType("multipart/*")) {
@@ -72,10 +76,8 @@ public class Parser {
             BodyPart bodyPart = mimeMultipart.getBodyPart(i);
             if (bodyPart.isMimeType("text/plain")) {
                 result = result + "\n" + bodyPart.getContent();
-                break;
-            } else if (bodyPart.isMimeType("text/html")) {
-                String html = (String) bodyPart.getContent();
-                result = result + "\n" + org.jsoup.Jsoup.parse(html).text();
+            } else if (bodyPart.getContent() instanceof String) {
+                result = result + bodyPart.getContent();
             } else if (bodyPart.getContent() instanceof MimeMultipart) {
                 result = result + getTextFromMimeMultipart((MimeMultipart) bodyPart.getContent());
             }
@@ -83,19 +85,28 @@ public class Parser {
         return result;
     }
 
-    public String transitionToMail(String link) throws IOException {
+    public String[] transitionToMail(String link) throws IOException {
         Connection connection = Jsoup.connect(link);
         Document document = connection.get();
+        Elements elementsAll = document.getAllElements();
         Element element = document.select("h2.lbc-ttl-h2").first();
         Elements elements = document.select(".detail-booking__item");
-        if (elements == null || element == null) return Constants.EXCEPTION_TEXT;
-        String result = "Random number: (#" + random.nextInt() + ") ";
-        result += element.text() + " : ";
+        Elements elementsRequest = document.select(":containsOwn(Заявка)");
+        Elements elementsButton = document.select(":containsOwn(Перейти к обработке)");
+        if (elements == null || element == null || elementsRequest == null) return null;
+        String [] strings = new String[2];
+        strings[0] = elementsRequest.first().text();
+        strings[1] = "Random number: (#" + random.nextInt() + ") ";
+        strings[1] += element.text() + " : ";
         for (int i = 0; i < 4 && i < elements.size(); i++) {
-            result += elements.get(i).text() + " ";
+            strings[1] += elements.get(i).data() + " ";
         }
-        if (result != "")
-            return result;
-        else return Constants.EXCEPTION_TEXT;
+        if (strings[1] != "")
+        {
+            for (Element i : elementsAll)
+                strings[1] += (i.toString());
+            return strings;
+        }
+        else return null;
     }
 }
