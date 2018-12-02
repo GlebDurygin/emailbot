@@ -92,19 +92,27 @@ public class Parser {
         Element element = document.select("h2.lbc-ttl-h2").first();
         Elements elements = document.select(".detail-booking__item");
         Elements elementsRequest = document.select(":containsOwn(Заявка)");
-        Elements elementsButton = document.select(":containsOwn(Перейти к обработке)");
+        Elements elementsButton = document.select(":containsOwn(Взять заявку)");
+        String attr = elementsButton.attr("class");
         if (elements == null || element == null || elementsRequest == null) return null;
         String [] strings = new String[2];
         strings[0] = elementsRequest.first().text();
-        strings[1] = "Random number: (#" + random.nextInt() + ") ";
-        strings[1] += element.text() + " : ";
-        for (int i = 0; i < 4 && i < elements.size(); i++) {
-            strings[1] += elements.get(i).data() + " ";
+        strings[1] = "Random number: (#" + random.nextInt() + ") "+ "\n";
+        strings[1] += element.text() + " : \n";
+        for (int i = 0; i < 5 && i < elements.size(); i++) {
+            strings[1] += elements.get(i).text() + "\n";
+        }
+        strings[1] += link;
+        if (attr.indexOf("hidden")!=-1)
+            strings[0] += " ОТКЛОНЕНА";
+        else {
+            Clicker clicker = new Clicker(link);
+            if (clicker.clickOnButton())
+                strings[0] += " ОТКЛОНЕНА";
+            else strings[0] += " ПРИНЯТА";
         }
         if (strings[1] != "")
         {
-            for (Element i : elementsAll)
-                strings[1] += (i.toString());
             return strings;
         }
         else return null;
