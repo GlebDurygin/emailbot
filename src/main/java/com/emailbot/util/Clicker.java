@@ -24,7 +24,12 @@ public class Clicker {
         if (loginButton != null)
         {
             loginButton.click();
+            webDriver.close();
             return true;
-        } else return false;
+        } else
+        {
+            webDriver.close();
+            return false;
+        }
     }
 }
